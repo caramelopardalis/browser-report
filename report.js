@@ -8,28 +8,54 @@
     };
 
     const main = () => {
-        paperize();
+        pagerize();
         complete();
     };
 
-    const paperize = () => {
-        const page = createPage();
-        const report = document.getElementsByClassName('report')[0];
-        while (0 < report.childNodes.length) {
-            page.appendChild(report.childNodes[0]);
+    const pagerize = () => {
+        let page = new Page();
+        const content = document.getElementsByClassName('content')[0];
+        while (0 < content.childNodes.length) {
+            page.appendChild(content.childNodes[0]);
         }
-        report.appendChild(page);
+        content.appendChild(page.container);
     };
 
     const complete = () => {
         document.getElementsByClassName('hide')[0].classList.remove('hide');
     };
 
-    const createPage = () => {
-        const page = document.createElement('div');
-        page.className = 'page';
-        return page;
-    };
+    class Page {
+        constructor() {    
+            this.container = this.createContainer();
+            this.contentOutline = this.createContentOutline();
+            this.container.appendChild(this.contentOutline);
+            this.contentOutlineInner = this.createContentOutlineInner();
+            this.contentOutline.appendChild(this.contentOutlineInner);
+        }
+
+        appendChild(element) {
+            this.contentOutlineInner.appendChild(element);
+        }
+
+        createContainer() {
+            const element = document.createElement('div');
+            element.className = 'page';
+            return element;
+        }
+
+        createContentOutline() {
+            const element = document.createElement('div');
+            element.className = 'content-outline';
+            return element;
+        }
+
+        createContentOutlineInner() {
+            const element = document.createElement('div');
+            element.className = 'content-outline-inner';
+            return element;
+        }
+    }
 
     ready(main);
 })();

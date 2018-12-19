@@ -10,19 +10,14 @@
     margin: 0.4in;
     size: A4;
 }
+.a4-portrait .page {
+    width: calc(var(--a4-x) - (var(--print-default-margin) * 2));
+    height: calc(var(--a4-y) - (var(--print-default-margin) * 2));
+}
 
 * {
     margin: 0;
     padding: 0;
-}
-.hide {
-    /* hide contents until layout is done */
-    visibility: hidden;
-}
-
-.a4-portrait .page {
-    width: calc(var(--a4-x) - (var(--print-default-margin) * 2));
-    height: calc(var(--a4-y) - (var(--print-default-margin) * 2));
 }
 
 @media screen {
@@ -34,4 +29,19 @@
         background: white;
         box-shadow: 0 .5mm 2mm rgba(0, 0, 0, .3);
     }
+}
+
+.hide {
+    /* hide contents until layout is done */
+    visibility: hidden;
+}
+
+.page {
+    padding: 10mm;
+}
+.content-outline {
+    border: 1px solid black;
+}
+.content-outline-inner {
+    margin: -1px;
 }
