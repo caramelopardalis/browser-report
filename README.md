@@ -6,7 +6,7 @@ We can't control browser's page breaking when contents overflowed. So, this libr
 
 ## Examples
 
-<img src="browser.report/example1/example1-on-browser.png">
+![Screenshot](example1/example1-on-browser.png)
 
 ```html
 <!DOCTYPE html>
