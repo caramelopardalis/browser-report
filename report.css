@@ -7,7 +7,7 @@
 
 @page {
     size: A4;
-    /* margin is overwrited by custom settings, and can't remove settings */
+    /* margin is overwrited by custom settings, and can't remove custom settings */
 }
 .br-a4-portrait > .br-page {
     width: calc(var(--a4-x) - (var(--print-default-margin) * 2));

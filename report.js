@@ -8,12 +8,8 @@
     };
 
     const main = () => {
-        loadScripts([
-            'lib/bignumber.min.js'
-        ], () => {
-            pagerize();
-            complete();
-        });
+        pagerize();
+        complete();
     };
 
     const pagerize = () => {
@@ -53,38 +49,6 @@
         document.getElementsByClassName('br-hide')[0].classList.remove('br-hide');
     };
 
-	const loadScripts = (urls, callback) => {
-		if (urls.length) {
-			loadScript(urls[0], () => {
-				urls = urls.slice(1);
-				loadScripts(urls, callback);
-			});
-		} else {
-			callback();
-		}
-	};
-
-	const loadScript = (url, callback) => {
-		const script = document.createElement('script');
-		script.type = 'text/javascript';
-		script.async = false;
-		script.src = url;
-
-		if (script.readyState) {
-			script.onreadystatechange = () => {
-				if (script.readyState === 'loaded' || script.readyState === 'complete') {
-					script.onreadystatechange = null;
-					callback();
-				}
-			};
-		} else {
-			script.onload = () => {
-				callback();
-			};
-		};
-		document.getElementsByTagName('body')[0].appendChild(script);
-    };
-    
     const getLayout = (element) => {
         return element.getBoundingClientRect();
     };
@@ -94,6 +58,7 @@
             this.container = this.createContainer();
             this.containerInner = this.createContainerInner();
             this.container.appendChild(this.containerInner);
+
             this.contentOutline = this.createContentOutline();
             this.containerInner.appendChild(this.contentOutline);
             this.contentOutlineInner = this.createContentOutlineInner();
