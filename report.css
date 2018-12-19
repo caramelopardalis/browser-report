@@ -1,0 +1,37 @@
+:root {
+    --a4-x: 210mm;
+    --a4-y: 297mm;
+    /* chromium's default value */
+    --print-default-margin: 0.4in;
+}
+
+@page {
+    /* can't use var() in Google Chrome Version 71.0.3578.98 (Official Build) (64-bit)  */
+    margin: 0.4in;
+    size: A4;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+.hide {
+    /* hide contents until layout is done */
+    visibility: hidden;
+}
+
+.a4-portrait .page {
+    width: calc(var(--a4-x) - (var(--print-default-margin) * 2));
+    height: calc(var(--a4-y) - (var(--print-default-margin) * 2));
+}
+
+@media screen {
+    html {
+        background: #eee;
+    }
+    .page {
+        margin: var(--print-default-margin);
+        background: white;
+        box-shadow: 0 .5mm 2mm rgba(0, 0, 0, .3);
+    }
+}
