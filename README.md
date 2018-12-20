@@ -33,7 +33,7 @@ We can't control browser's page breaking when contents overflowed. So, this libr
 </html>
 ```
 
-![Example2 on browser](example1/example2-on-browser.png)
+![Example2 on browser](example2/example2-on-browser.png)
 
 ```html
 <!DOCTYPE html>
