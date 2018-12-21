@@ -1,12 +1,4 @@
-(() => {
-    const ready = callback => {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', callback)
-        } else {
-            setTimeout(callback, 0)
-        }
-    }
-
+((global) => {
     const main = () => {
         pagerize()
         complete()
@@ -131,6 +123,59 @@
           return v.toString(16)
         })
     }
+    
+	const loadScripts = (urls, callback) => {
+		if (urls.length) {
+			loadScript(urls[0], () => {
+				urls = urls.slice(1)
+				loadScripts(urls, callback)
+			})
+		} else {
+			callback()
+		}
+	}
+
+	const loadScript = (url, callback) => {
+		const script = document.createElement('script')
+		script.type = 'text/javascript'
+		script.async = false
+		script.src = url
+
+		if (script.readyState) {
+			script.onreadystatechange = () => {
+				if (script.readyState === 'loaded' || script.readyState === 'complete') {
+					script.onreadystatechange = null
+					callback()
+				}
+			}
+		} else {
+			script.onload = () => {
+				callback()
+			}
+		}
+		document.getElementsByTagName('body')[0].appendChild(script)
+    }
+    
+    class Waiter {
+        constructor(callback) {
+            this.callback = callback
+            this.counter = 0
+        }
+
+        wait(func) {
+            --this.counter
+            func()
+        }
+        
+        ok() {
+            setTimeout(() => {
+                this.counter++
+                if (this.counter === 0) {
+                    this.callback()
+                }
+            }, 0)
+        }
+    }
 
     class Page {
         constructor() {    
@@ -181,5 +226,34 @@
         }
     }
 
-    ready(main)
-})()
+    const waiter = new Waiter(main)
+
+    waiter.wait(() => {
+        loadScripts([
+            'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js'
+        ], () => {
+            WebFont.load({
+                google: {
+                    families: [
+                        'Noto Sans JP'
+                    ]
+                },
+                active() {
+                    waiter.ok()
+                }
+            })
+        })
+    })
+
+    waiter.wait(() => {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                waiter.ok()
+            })
+        } else {
+            setTimeout(() => {
+                waiter.ok()
+            }, 0)
+        }
+    })
+})(this)

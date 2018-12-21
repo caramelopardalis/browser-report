@@ -1,4 +1,4 @@
-# browser.report
+# Browser Report
 
 💪💪💪Layout library for browser based reporting.
 
