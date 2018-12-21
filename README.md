@@ -42,6 +42,30 @@ We can't control browser's page breaking when contents overflowed. So, this libr
         <link rel="stylesheet" href="../browser.report.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.2/gh-fork-ribbon.min.css">
         <style>
+            h1 {
+                padding-left: 2mm;
+            }
+
+            .br-grid-header {
+                padding: .5em;
+                text-align: center;
+                font-weight: bold;
+            }
+            .br-grid-data {
+                padding: .5em;
+                padding-bottom: 1em;
+            }
+
+            .countries .br-grid-data {
+                padding-bottom: .5em;
+            }
+            .country-name {
+                flex-grow: 1;
+            }
+            .national-capital-name {
+                min-width: 300px;
+            }
+
             .fruit-name {
                 min-width: 300px;
             }
@@ -64,7 +88,47 @@ We can't control browser's page breaking when contents overflowed. So, this libr
     </head>
     <body class="br-a4-portrait">
         <div class="br-content">
-            <div class="br-group">
+            <h1>Countries</h1>
+            <div class="br-group countries">
+                <div class="br-grid">
+                    <div class="br-grid-header country-name">Country</div>
+                    <div class="br-grid-header national-capital-name">National Capital</div>
+                </div>
+                <div class="br-group br-grid">
+                    <div class="br-grid-data country-name">Nigeria</div>
+                    <div class="br-grid-data national-capital-name">Abuja</div>
+                </div>
+                <div class="br-group br-grid">
+                    <div class="br-grid-data country-name">Ghana</div>
+                    <div class="br-grid-data national-capital-name">Accra</div>
+                </div>
+                <div class="br-group br-grid">
+                    <div class="br-grid-data country-name">Algeria</div>
+                    <div class="br-grid-data national-capital-name">Algiers</div>
+                </div>
+                <div class="br-group br-grid">
+                    <div class="br-grid-data country-name">Mali</div>
+                    <div class="br-grid-data national-capital-name">Bamako</div>
+                </div>
+                <div class="br-group br-grid">
+                    <div class="br-grid-data country-name">Central African Republic</div>
+                    <div class="br-grid-data national-capital-name">Bangui</div>
+                </div>
+                <div class="br-group br-grid">
+                    <div class="br-grid-data country-name">Gambia</div>
+                    <div class="br-grid-data national-capital-name">Banjul</div>
+                </div>
+                <div class="br-group br-grid">
+                    <div class="br-grid-data country-name">Guinea-Bissau</div>
+                    <div class="br-grid-data national-capital-name">Bissau</div>
+                </div>
+                <div class="br-group br-grid">
+                    <div class="br-grid-data country-name">Republic of the Congo</div>
+                    <div class="br-grid-data national-capital-name">Brazzaville</div>
+                </div>
+            </div>
+            <h1>Fruits</h1>
+            <div class="br-group fruits">
                 <div class="br-grid">
                     <div class="br-grid-header fruit-name">Name</div>
                     <div class="br-grid-header fruit-price">Price</div>
@@ -92,7 +156,7 @@ We can't control browser's page breaking when contents overflowed. So, this libr
                 </div>
             </div>
         </div>
-        <a class="github-fork-ribbon left-top" data-ribbon="Virtual Print Preview" title="Virtual Print Preview">Virtual Print Preview</a> 
+        <a class="github-fork-ribbon left-top" data-ribbon="Print Emulating" title="Print Emulating">Print Emulating</a> 
         <script src="../browser.report.js"></script>
     </body>
 </html>
