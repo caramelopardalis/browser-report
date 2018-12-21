@@ -36,6 +36,10 @@ html {
     }
 }
 
+.br-page {
+    break-after: page;
+}
+
 .br-page-inner {
     width: 100%;
     height: 100%;

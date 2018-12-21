@@ -24,6 +24,7 @@
             let trimedCount = 0
             while (page.getHeight() < page.getContentHeight()) {
                 if (currentElement.textContent.length === 0) {
+                    // can't layout to current page, so layout the currentElement to next page
                     currentElement.textContent = original
                     currentElement.parentElement.removeChild(currentElement)
                     return currentElement
@@ -37,8 +38,25 @@
                 ++trimedCount
             }
 
-            const remaining = currentElement.closest('.br-group').cloneNode(true)
+            const ancestorGroups = []
+            const ancestorGroupsIds = [];
+            let ancestorGroup = currentElement.closest('.br-group')
+            while (ancestorGroup) {
+                ancestorGroups.push(ancestorGroup)
+                ancestorGroupsIds.push(ancestorGroup.getAttribute('data-br-id'))
+                ancestorGroup = ancestorGroup.parentElement.closest('.br-group')
+            }
+
+            const remaining = ancestorGroups[ancestorGroups.length - 1].cloneNode(true)
             remaining.querySelector('[data-br-id="' + currentElement.getAttribute('data-br-id') + '"]').textContent = original.substring(original.length - trimedCount)
+
+            const groupedGroups = remaining.querySelectorAll(':scope .br-group')
+            for (const groupedGroup of groupedGroups) {
+                if (!ancestorGroupsIds.includes(groupedGroup.getAttribute('data-br-id'))) {
+                    groupedGroup.parentElement.removeChild(groupedGroup)
+                }
+            }
+
             return remaining
         }
 
