@@ -77,19 +77,24 @@ html {
 ,.br-grid-data {
     display: inline-block;
 }
-.br-grid-header {
+
+.br-bordered.br-grid:first-child .br-grid-header:not(:first-child)
+,.br-bordered.br-grid:first-child .br-grid-data:not(:first-child) {
     border: 1px solid black;
     border-left: none;
 }
-.br-grid-data {
+.br-bordered.br-grid:first-child .br-grid-header:first-child
+,.br-bordered.br-grid:first-child .br-grid-data:first-child {
+    border: 1px solid black;
+}
+.br-bordered.br-grid:not(:first-child) .br-grid-header:not(:first-child)
+,.br-bordered.br-grid:not(:first-child) .br-grid-data:not(:first-child) {
     border: 1px solid black;
     border-top: none;
     border-left: none;
 }
-.br-grid-header:first-child {
-    border: 1px solid black;
-}
-.br-grid-data:first-child {
+.br-bordered.br-grid:not(:first-child) .br-grid-header:first-child
+,.br-bordered.br-grid:not(:first-child) .br-grid-data:first-child {
     border: 1px solid black;
     border-top: none;
 }

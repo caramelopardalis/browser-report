@@ -1,6 +1,6 @@
 # Browser Report
 
-💪💪💪Layout library for browser based reporting.
+Layout library for browser based reporting.
 
 We can't control browser's page breaking when contents overflowed. So, this library splits overflowed contents, and breaks the page on DOM tree.
 

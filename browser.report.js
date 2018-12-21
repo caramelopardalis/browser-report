@@ -14,32 +14,45 @@
         let page = new Page()
         pagesContainer.appendChild(page.container)
 
-        const split = (currentElement) => {
-            if (!currentElement.classList.contains('br-grid-data')) {
-                currentElement.parentElement.removeChild(currentElement)
-                return currentElement
+        const split = (clonedCurrentElement, currentElement) => {
+            if (!clonedCurrentElement.classList.contains('br-grid-data')) {
+                clonedCurrentElement.parentElement.removeChild(clonedCurrentElement)
+                return clonedCurrentElement
+            }
+
+            const insertedLittleBrothers = []
+            let littleBrother = currentElement.nextElementSibling
+            while (littleBrother) {
+                insertedLittleBrothers.push(littleBrother)
+                clonedCurrentElement.parentElement.insertBefore(littleBrother, clonedCurrentElement.nextElementSibling)
+                littleBrother = littleBrother.nextElementSibling
             }
 
             let original
             let trimedCount = 0
             while (page.getHeight() < page.getContentHeight()) {
-                if (currentElement.textContent.length === 0) {
+                if (clonedCurrentElement.textContent.length === 0) {
                     // can't layout to current page, so layout the currentElement to next page
-                    currentElement.textContent = original
-                    currentElement.parentElement.removeChild(currentElement)
-                    return currentElement
+                    clonedCurrentElement.textContent = original
+                    clonedCurrentElement.parentElement.removeChild(clonedCurrentElement)
+
+                    for (const insertedLittleBrother of insertedLittleBrothers) {
+                        insertedLittleBrother.parentElement.removeChild(insertedLittleBrother)
+                    }
+
+                    return clonedCurrentElement
                 }
 
                 if (original === undefined) {
-                    original = currentElement.textContent
+                    original = clonedCurrentElement.textContent
                 }
 
-                currentElement.textContent = currentElement.textContent.substring(0, currentElement.textContent.length - 1)
+                clonedCurrentElement.textContent = clonedCurrentElement.textContent.substring(0, clonedCurrentElement.textContent.length - 1)
                 ++trimedCount
             }
 
             const ancestorGroups = []
-            const ancestorGroupsIds = [];
+            const ancestorGroupsIds = []
             let ancestorGroup = currentElement.closest('.br-group')
             while (ancestorGroup) {
                 ancestorGroups.push(ancestorGroup)
@@ -48,7 +61,7 @@
             }
 
             const remaining = ancestorGroups[ancestorGroups.length - 1].cloneNode(true)
-            remaining.querySelector('[data-br-id="' + currentElement.getAttribute('data-br-id') + '"]').textContent = original.substring(original.length - trimedCount)
+            remaining.querySelector('[data-br-id="' + clonedCurrentElement.getAttribute('data-br-id') + '"]').textContent = original.substring(original.length - trimedCount)
 
             const groupedGroups = remaining.querySelectorAll(':scope .br-group')
             for (const groupedGroup of groupedGroups) {
@@ -77,7 +90,7 @@
             }
 
             if (page.getHeight() < page.getContentHeight()) {
-                const pushedElement = split(clonedCurrentElement)
+                const pushedElement = split(clonedCurrentElement, currentElement)
                 page = new Page()
                 pagesContainer.appendChild(page.container)
                 page.appendChild(pushedElement)
