@@ -1,11 +1,15 @@
 ((global) => {
-    const main = () => {
-        pagerize()
-        complete()
+    const WALKER_ASYNC_PROCESS_COUNT = 1
+    const SHRINK_ASYNC_PROCESS_COUNT = 1
+
+    const main = async () => {
+        await pagerize()
     }
 
-    const pagerize = () => {
+    const pagerize = async () => {
         const contentContainer = document.getElementsByClassName('br-content')[0]
+
+        addMetadata(contentContainer)
 
         const pagesContainer = document.createElement('div')
         pagesContainer.classList.add('br-pages-container')
@@ -14,43 +18,127 @@
         let page = new Page()
         pagesContainer.appendChild(page.container)
 
-        const split = (clonedCurrentElement, currentElement) => {
+        const pageBreakIfOverflowed = async (clonedCurrentElement, currentElement) => {
+            if (page.getContentHeight() <= page.getHeight()) {
+                return
+            }
+
             if (!clonedCurrentElement.classList.contains('br-grid-data')) {
-                clonedCurrentElement.parentElement.removeChild(clonedCurrentElement)
-                return clonedCurrentElement
+                moveToNextPage(clonedCurrentElement)
+                return
             }
 
-            const insertedLittleBrothers = []
-            let littleBrother = currentElement.nextElementSibling
-            while (littleBrother) {
-                insertedLittleBrothers.push(littleBrother)
-                clonedCurrentElement.parentElement.insertBefore(littleBrother, clonedCurrentElement.nextElementSibling)
-                littleBrother = littleBrother.nextElementSibling
-            }
+            const originalNearestGroup = currentElement.closest('.br-group')
+            // TODO check originalNearestGroup null
+            const clonedOriginalNearestGroup = originalNearestGroup.cloneNode(true)
 
-            let original
-            let trimedCount = 0
+            // replace the nearest group in page to the original nearest group (because next siblings not yet copied)
+            const insertedNearestGroup = page.container.querySelector(':scope [data-br-id="' + clonedOriginalNearestGroup.getAttribute('data-br-id') + '"]')
+            insertedNearestGroup.parentElement.insertBefore(clonedOriginalNearestGroup, insertedNearestGroup)
+            insertedNearestGroup.parentElement.removeChild(insertedNearestGroup)
+
             while (page.getHeight() < page.getContentHeight()) {
-                if (clonedCurrentElement.textContent.length === 0) {
-                    // can't layout to current page, so layout the currentElement to next page
-                    clonedCurrentElement.textContent = original
-                    clonedCurrentElement.parentElement.removeChild(clonedCurrentElement)
+                while (page.getHeight() < page.getContentHeight()) {
+                    await shrink(currentElement)
 
-                    for (const insertedLittleBrother of insertedLittleBrothers) {
-                        insertedLittleBrother.parentElement.removeChild(insertedLittleBrother)
+                    if (!hasData(currentElement)) {
+                        // move the group to next page
+                        for (const datumInNearestGroup of dataInNearestGroup) {
+                            datumInNearestGroup.setAttribute('br-removed-count', 0)
+                            contentContainer.querySelector(':scope [data-br-id="' + datumInNearestGroup.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', 0)
+                        }
+                        dataInNearestGroup.parentElement.removeChild(dataInNearestGroup)
+                        copyGroupToNextPage(currentElement)
                     }
-
-                    return clonedCurrentElement
                 }
 
-                if (original === undefined) {
-                    original = clonedCurrentElement.textContent
-                }
+                const nearestGroup = page.container.querySelector(':scope [data-br-id="' + originalNearestGroup.getAttribute('data-br-id') + '"]')
+                const dataInNearestGroup = nearestGroup.querySelectorAll(':scope .br-grid-data')
+                for (const datumInNearestGroup of dataInNearestGroup) {
+                    if (0 < parseInt(datumInNearestGroup.getAttribute('data-br-removed-count'))) {
+                        copyGroupToNextPage(currentElement)
 
-                clonedCurrentElement.textContent = clonedCurrentElement.textContent.substring(0, clonedCurrentElement.textContent.length - 1)
-                ++trimedCount
+                        const newNearestGroup = page.container.querySelector(':scope [data-br-id="' + originalNearestGroup.getAttribute('data-br-id') + '"]')
+                        const newDataInNearestGroup = newNearestGroup.querySelectorAll(':scope .br-grid-data')
+                        for (const newDatumInNearestGroup of newDataInNearestGroup) {
+                            const removedCount = parseInt(newDatumInNearestGroup.getAttribute('data-br-removed-count'))
+                            const startIndex = parseInt(newDatumInNearestGroup.getAttribute('data-br-start-index'))
+                            const originalText = newDatumInNearestGroup.getAttribute('data-br-original-text')
+                            let newStartIndex = startIndex === 0 ? originalText.length - removedCount : startIndex + (originalText.length - startIndex - removedCount)
+
+                            newDatumInNearestGroup.setAttribute('data-br-removed-count', 0)
+                            contentContainer.querySelector(':scope [data-br-id="' + newDatumInNearestGroup.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', 0)
+
+                            if (removedCount === 0) {
+                                newStartIndex = 0
+                            } else if (originalText.length <= newStartIndex || newStartIndex < 0) {
+                                newStartIndex = originalText.length
+                            }
+
+                            newDatumInNearestGroup.setAttribute('data-br-start-index', newStartIndex)
+                            contentContainer.querySelector(':scope [data-br-id="' + newDatumInNearestGroup.getAttribute('data-br-id') + '"]').setAttribute('data-br-start-index', newStartIndex)
+                            newDatumInNearestGroup.textContent = originalText.substring(newStartIndex)
+                        }
+                        
+                        break
+                    }
+                }
+            }
+        }
+
+        const shrink = async (currentElement) => {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    const originalNearestGroup = currentElement.closest('.br-group')
+                    const nearestGroup = page.container.querySelector(':scope [data-br-id="' + originalNearestGroup.getAttribute('data-br-id') + '"]')
+                    const dataInNearestGroup = nearestGroup.querySelectorAll(':scope .br-grid-data')
+
+                    // TODO compare real height instead of characters count
+                    let mostBiggestCharacters = 0
+                    let mostBiggestElement
+                    for (const datumInNearestGroup of dataInNearestGroup) {
+                        const characters = datumInNearestGroup.textContent.length 
+                        if (mostBiggestCharacters < characters) {
+                            mostBiggestCharacters = characters
+                            mostBiggestElement = datumInNearestGroup
+                        }
+                    }
+                    if (mostBiggestElement) {
+                        const removedCount = parseInt(mostBiggestElement.getAttribute('data-br-removed-count')) + 1
+                        mostBiggestElement.setAttribute('data-br-removed-count', removedCount)
+                        contentContainer.querySelector(':scope [data-br-id="' + mostBiggestElement.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', removedCount)
+                        mostBiggestElement.textContent = mostBiggestElement.textContent.substring(0, mostBiggestElement.textContent.length - 1)
+                    }
+    
+                    resolve()
+                }, 0)
+            })
+        }
+
+        const hasData = (currentElement) => {
+            const originalNearestGroup = currentElement.closest('.br-group')
+            const nearestGroup = page.container.querySelector(':scope [data-br-id="' + originalNearestGroup.getAttribute('data-br-id') + '"]')
+            const dataInNearestGroup = nearestGroup.querySelectorAll(':scope .br-grid-data')
+
+            let hasText = false
+            for (const datumInNearestGroup of dataInNearestGroup) {
+                if (0 < datumInNearestGroup.textContent.length) {
+                    hasText = true
+                    break
+                }
             }
 
+            return hasText
+        }
+
+        const moveToNextPage = (element) => {
+            element.parentElement.removeChild(element)
+            page = new Page()
+            pagesContainer.appendChild(page.container)
+            page.appendChild(element)
+        }
+
+        const copyGroupToNextPage = (currentElement) => {
             const ancestorGroups = []
             const ancestorGroupsIds = []
             let ancestorGroup = currentElement.closest('.br-group')
@@ -60,42 +148,40 @@
                 ancestorGroup = ancestorGroup.parentElement.closest('.br-group')
             }
 
-            const remaining = ancestorGroups[ancestorGroups.length - 1].cloneNode(true)
-            remaining.querySelector('[data-br-id="' + clonedCurrentElement.getAttribute('data-br-id') + '"]').textContent = original.substring(original.length - trimedCount)
+            const clonedFarthestGroup = ancestorGroups[ancestorGroups.length - 1].cloneNode(true)
 
-            const groupedGroups = remaining.querySelectorAll(':scope .br-group')
+            const groupedGroups = clonedFarthestGroup.querySelectorAll(':scope .br-group')
             for (const groupedGroup of groupedGroups) {
                 if (!ancestorGroupsIds.includes(groupedGroup.getAttribute('data-br-id'))) {
                     groupedGroup.parentElement.removeChild(groupedGroup)
                 }
             }
 
-            return remaining
+            page = new Page()
+            pagesContainer.appendChild(page.container)
+            page.appendChild(clonedFarthestGroup)
         }
 
-        walkDescendant(contentContainer, (currentElement) => {
-            currentElement.setAttribute('data-br-id', uuid())
-
-            const parent = page.container.querySelector('[data-br-id="' + currentElement.parentElement.getAttribute('data-br-id') + '"]')
+        await walkDescendant(contentContainer, async (currentElement) => {
+            const parent = page.container.querySelector(':scope [data-br-id="' + currentElement.parentElement.getAttribute('data-br-id') + '"]')
             const clonedCurrentElement = currentElement.cloneNode(false)
             for (let i = 0; i < currentElement.childNodes.length; i++) {
                 if (currentElement.childNodes[i].nodeType === Node.TEXT_NODE) {
-                    clonedCurrentElement.appendChild(currentElement.childNodes[i])
+                    clonedCurrentElement.appendChild(currentElement.childNodes[i].cloneNode(false))
                 }
             }
             if (!parent) {
-                page.appendChild(clonedCurrentElement)
+                if (!page.container.querySelector(':scope [data-br-id="' + clonedCurrentElement.getAttribute('data-br-id') + '"]')) {
+                    page.appendChild(clonedCurrentElement)
+                }
             } else {
-                parent.appendChild(clonedCurrentElement)
+                if (!parent.querySelector(':scope [data-br-id="' + clonedCurrentElement.getAttribute('data-br-id') + '"]')) {
+                    parent.appendChild(clonedCurrentElement)
+                }
             }
 
-            if (page.getHeight() < page.getContentHeight()) {
-                const pushedElement = split(clonedCurrentElement, currentElement)
-                page = new Page()
-                pagesContainer.appendChild(page.container)
-                page.appendChild(pushedElement)
-            }
-        })
+            await pageBreakIfOverflowed(clonedCurrentElement, currentElement)
+        }, complete)
     }
 
     const complete = () => {
@@ -103,12 +189,25 @@
         content.parentElement.removeChild(content)
     }
 
-    const walkDescendant = (root, elementHandler) => {
+    const addMetadata = (contentContainer) => {
+        const originals = contentContainer.querySelectorAll(':scope *')
+        for (const original of originals) {
+            original.setAttribute('data-br-id', uuid())
+        }
+        const data = contentContainer.querySelectorAll(':scope .br-grid-data')
+        for (const datum of data) {
+            datum.setAttribute('data-br-start-index', 0)
+            datum.setAttribute('data-br-removed-count', 0)
+            datum.setAttribute('data-br-original-text', datum.textContent)
+        }
+    }
+
+    const walkDescendant = async (root, elementHandler, completeHandler) => {
         let currentElement = root
         let processCount = 0
-        const walk = () => {
+        const walk = async () => {
             if (currentElement !== root) {
-                processCurrentElement()
+                await processCurrentElement()
             }
 
             if (0 < currentElement.children.length) {
@@ -119,6 +218,9 @@
                 let element = currentElement
                 while (element.parentElement) {
                     if (element.parentElement === root) {
+                        if (completeHandler) {
+                            completeHandler()
+                        }
                         return;
                     }
                     if (element.parentElement.nextElementSibling) {
@@ -129,19 +231,19 @@
                 currentElement = element.parentElement.nextElementSibling
             }
 
-            if (1 === processCount) {
+            if (WALKER_ASYNC_PROCESS_COUNT === processCount) {
                 processCount = 0
                 setTimeout(walk, 0)
             } else {
                 walk()
             }
         }
-        const processCurrentElement = () => {
+        const processCurrentElement = async () => {
             ++processCount
 
-            elementHandler(currentElement)
+            await elementHandler(currentElement)
         }
-        walk()
+        await walk()
     }
     
     const getLayout = (element) => {
