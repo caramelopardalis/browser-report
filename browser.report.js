@@ -1,6 +1,6 @@
 ((global) => {
     const WALKER_ASYNC_PROCESS_COUNT = 1
-    const SHRINK_ASYNC_PROCESS_COUNT = 1
+    const SHRINK_ASYNC_PROCESS_COUNT = 10
 
     const main = async () => {
         await pagerize()
@@ -17,6 +17,8 @@
 
         let page = new Page()
         pagesContainer.appendChild(page.container)
+
+        let shrinkCount = 0
 
         const pageBreakIfOverflowed = async (clonedCurrentElement, currentElement) => {
             if (page.getContentHeight() <= page.getHeight()) {
@@ -39,7 +41,12 @@
 
             while (page.getHeight() < page.getContentHeight()) {
                 while (page.getHeight() < page.getContentHeight()) {
-                    await shrink(currentElement)
+                    if (++shrinkCount === SHRINK_ASYNC_PROCESS_COUNT) {
+                        shrinkCount = 0
+                        await shrink(currentElement)
+                    } else {
+                        shrinkSync(currentElement)
+                    }
 
                     if (!hasData(currentElement)) {
                         // move the group to next page
@@ -89,30 +96,33 @@
         const shrink = async (currentElement) => {
             return new Promise((resolve, reject) => {
                 setTimeout(() => {
-                    const originalNearestGroup = currentElement.closest('.br-group')
-                    const nearestGroup = page.container.querySelector(':scope [data-br-id="' + originalNearestGroup.getAttribute('data-br-id') + '"]')
-                    const dataInNearestGroup = nearestGroup.querySelectorAll(':scope .br-grid-data')
-
-                    // TODO compare real height instead of characters count
-                    let mostBiggestCharacters = 0
-                    let mostBiggestElement
-                    for (const datumInNearestGroup of dataInNearestGroup) {
-                        const characters = datumInNearestGroup.textContent.length 
-                        if (mostBiggestCharacters < characters) {
-                            mostBiggestCharacters = characters
-                            mostBiggestElement = datumInNearestGroup
-                        }
-                    }
-                    if (mostBiggestElement) {
-                        const removedCount = parseInt(mostBiggestElement.getAttribute('data-br-removed-count')) + 1
-                        mostBiggestElement.setAttribute('data-br-removed-count', removedCount)
-                        contentContainer.querySelector(':scope [data-br-id="' + mostBiggestElement.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', removedCount)
-                        mostBiggestElement.textContent = mostBiggestElement.textContent.substring(0, mostBiggestElement.textContent.length - 1)
-                    }
-    
+                    shrinkSync(currentElement)
                     resolve()
                 }, 0)
             })
+        }
+
+        const shrinkSync = (currentElement) => {
+            const originalNearestGroup = currentElement.closest('.br-group')
+            const nearestGroup = page.container.querySelector(':scope [data-br-id="' + originalNearestGroup.getAttribute('data-br-id') + '"]')
+            const dataInNearestGroup = nearestGroup.querySelectorAll(':scope .br-grid-data')
+
+            // TODO compare real height instead of characters count
+            let mostBiggestCharacters = 0
+            let mostBiggestElement
+            for (const datumInNearestGroup of dataInNearestGroup) {
+                const characters = datumInNearestGroup.textContent.length 
+                if (mostBiggestCharacters < characters) {
+                    mostBiggestCharacters = characters
+                    mostBiggestElement = datumInNearestGroup
+                }
+            }
+            if (mostBiggestElement) {
+                const removedCount = parseInt(mostBiggestElement.getAttribute('data-br-removed-count')) + 1
+                mostBiggestElement.setAttribute('data-br-removed-count', removedCount)
+                contentContainer.querySelector(':scope [data-br-id="' + mostBiggestElement.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', removedCount)
+                mostBiggestElement.textContent = mostBiggestElement.textContent.substring(0, mostBiggestElement.textContent.length - 1)
+            }
         }
 
         const hasData = (currentElement) => {
@@ -184,9 +194,18 @@
         }, complete)
     }
 
-    const complete = () => {
+    const complete = async () => {
         const content = document.getElementsByClassName('br-content')[0]
         content.parentElement.removeChild(content)
+
+        await hideIndicator()
+    }
+
+    const hideIndicator = async () => {
+        const container = document.querySelector('.br-indicator-container')
+        if (container) {
+            document.body.removeChild(container)
+        }
     }
 
     const addMetadata = (contentContainer) => {
@@ -219,7 +238,7 @@
                 while (element.parentElement) {
                     if (element.parentElement === root) {
                         if (completeHandler) {
-                            completeHandler()
+                            await completeHandler()
                         }
                         return;
                     }
