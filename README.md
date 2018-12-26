@@ -4,7 +4,15 @@ Layout library for browser based reporting.
 
 We can't control browser's page breaking when contents overflowed. So, this library splits overflowed contents, and breaks the page on DOM tree.
 
+[Demo page](https://caramelopardalis.github.io/browser-report).
+
 ## Examples
+
+### Example 1
+
+[Demo](example1/example1.html)
+
+#### Screenshot
 
 ![Example1 on browser](example1/example1-on-browser.png)
 
@@ -134,6 +142,12 @@ We can't control browser's page breaking when contents overflowed. So, this libr
     </body>
 </html>
 ```
+
+### Example 2
+
+[Demo](example2/example2.html)
+
+#### Screenshot
 
 ![Example2 on browser](example2/example2-on-browser.png)
 
