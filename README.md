@@ -238,6 +238,89 @@ We can't control browser's page breaking when contents overflowed. So, this libr
 </html>
 ```
 
+### Example 3
+
+[Demo](example3/example3.html)
+
+#### Screenshot
+
+![Example3 on browser](example3/example3-on-browser.png)
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="../browser-report.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.2/gh-fork-ribbon.min.css">
+        <style>
+            h1 {
+                padding-top: 10mm;
+                padding-bottom: 10mm;
+                text-align: center;
+            }
+            .br-page-footer {
+                padding-top: 10mm;
+                padding-right: 10mm;
+                padding-bottom: 10mm;
+                text-align: right;
+            }
+
+            .br-grid-header {
+                padding: .5em;
+                min-width: 200px;
+                max-width: 200px;
+                text-align: right;
+                font-weight: bold;
+            }
+            .br-grid-data {
+                flex-grow: 1;
+                padding: .5em;
+                padding-right: 2em;
+                padding-bottom: 1em;
+            }
+
+            .github-fork-ribbon:before {
+                background-color: #cce5df;
+            }
+            @media print {
+                .github-fork-ribbon {
+                    display: none;
+                }
+            }
+        </style>
+    </head>
+    <body class="br-a4-portrait">
+        <div class="br-indicator-container">
+            <div class="br-indicator"></div>
+        </div>
+        <div class="br-content">
+            <div class="br-page-header">
+                <h1>Gorilla Report</h1>
+            </div>
+            <div class="br-group">
+                <div class="br-group br-grid">
+                    <div class="br-grid-header">Name</div>
+                    <div class="br-grid-data">Western Lowland Gorilla</div>
+                </div>
+                <div class="br-group br-grid">
+                    <div class="br-grid-header">Trinomial name</div>
+                    <div class="br-grid-data">Gorilla gorilla gorilla</div>
+                </div>
+                <div class="br-group br-grid">
+                    <div class="br-grid-header">Description</div>
+                    <div class="br-grid-data">The western lowland gorilla is the smallest subspecies of gorilla but nevertheless still a primate of exceptional size and strength. This species of gorillas exhibits pronounced sexual dimorphism. They possess no tails and have jet black skin along with coarse black hair that covers their entire body except for the face, ears, hands and feet. The hair on the back and rump of males takes on a grey coloration and is also lost as they get progressively older. This coloration is the reason why older males are known as "silverbacks". Their hands are proportionately large with nails on all digits, similar to that of a human's, and very large thumbs. They have short muzzles, a prominent brow ridge, large nostrils and small eyes and ears. Other features are large muscles in the jaw region along with broad and strong teeth. Among these teeth are strong sets of frontal canines and large molars in the back of the mouth for grinding fruits[3] and vegetables.[4] A male standing erect can be up to 1.8 m (5 ft 11 in) tall and weigh up to 270 kg (600 lb).[5] Males have an average weight of 140 kg (310 lb), females of 90 kg (200 lb).[6] Males in captivity, however, are noted to be capable of reaching weights up to 275 kg (606 lb).[4] Males stand upright at 163 cm (64 in), females at 1.5 m (4 ft 11 in).[5] According to the late John Aspinall a silverback gorilla in his prime has the physical strength of seven or eight Olympic weightlifters, but this claim is unverified. Western gorillas frequently stand upright, but walk in a hunched, quadrupedal fashion, with hands curled and knuckles touching the ground. This style of movement requires long arms, which works for western gorillas because the arm span of gorillas is larger than their standing height. <h5>Albinism</h5> The only known albino gorilla – named Snowflake – was a wild-born western lowland gorilla originally from Equatorial Guinea. Snowflake, a male gorilla, was taken from the wild and brought to the Barcelona Zoo in 1966 at a very young age. Snowflake presented the typical traits and characteristics of albinism typically seen in humans, including white hair, pinkish skin, light colored eyes, reduced visual perception and photophobia (discomfort in bright light). Snowflake was diagnosed by scientists as having non-syndromic albinism. The genetic variant for Snowflake’s albinism was identified by the scientists as a non-synonymous single nucleotide polymorphism located in a transmembrane region of SLC45A2. This transporter is also known to be involved in oculocutaneous albinism type 4 in humans. This information revealed the first evidence of inbreeding in western lowland gorillas.[7]</div>
+                </div>
+            </div>
+            <div class="br-page-footer">
+                <q>https://en.wikipedia.org/wiki/Western_lowland_gorilla</q>
+            </div>
+        </div>
+        <a class="github-fork-ribbon left-top" data-ribbon="Print Emulating" title="Print Emulating">Print Emulating</a> 
+        <script src="../browser-report.js"></script>
+    </body>
+</html>
+```
+
 ## Licenses
 
 * Thanks to loading.io (https://loading.io/spinner/ellipsis)

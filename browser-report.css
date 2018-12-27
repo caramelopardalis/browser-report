@@ -59,8 +59,10 @@ html {
 
 /* Definition No-Styled Classes */
 
-/* print to all pages */
-.br-all-repeat {}
+/* print to every page's top */
+.br-page-header {}
+/* print to every page's bottom */
+.br-page-footer {}
 /* elements in group are printed while the group is printing */
 .br-group {}
 /* disable .br-group */
@@ -76,6 +78,7 @@ html {
 .br-grid-header
 ,.br-grid-data {
     display: inline-block;
+    word-break: break-all;
 }
 
 .br-bordered.br-grid:first-child .br-grid-header:not(:first-child)

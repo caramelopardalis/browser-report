@@ -2,6 +2,9 @@
     const WALKER_ASYNC_PROCESS_COUNT = 1
     const SHRINK_ASYNC_PROCESS_COUNT = 10
 
+    let pageHeader
+    let pageFooter
+
     const main = async () => {
         await pagerize()
     }
@@ -10,6 +13,7 @@
         const contentContainer = document.getElementsByClassName('br-content')[0]
 
         addMetadata(contentContainer)
+        cutPageHeaderAndFooter(contentContainer)
 
         const pagesContainer = document.createElement('div')
         pagesContainer.classList.add('br-pages-container')
@@ -221,6 +225,24 @@
         }
     }
 
+    const cutPageHeaderAndFooter = (contentContainer) => {
+        pageHeader = contentContainer.querySelector(':scope .br-page-header')
+        if (pageHeader) {
+            pageHeader.parentElement.removeChild(pageHeader)
+        } else {
+            pageHeader = document.createElement('div')
+            pageHeader.classList.add('br-page-header')
+        }
+
+        pageFooter = contentContainer.querySelector(':scope .br-page-footer')
+        if (pageFooter) {
+            pageFooter.parentElement.removeChild(pageFooter)
+        } else {
+            pageFooter = document.createElement('div')
+            pageFooter.classList.add('br-page-footer')
+        }
+    }
+
     const walkDescendant = async (root, elementHandler, completeHandler) => {
         let currentElement = root
         let processCount = 0
@@ -339,10 +361,15 @@
             this.containerInner.appendChild(this.contentOutline)
             this.contentOutlineInner = this.createContentOutlineInner()
             this.contentOutline.appendChild(this.contentOutlineInner)
+
+            this.header = pageHeader.cloneNode(true)
+            this.contentOutlineInner.appendChild(this.header)
+            this.footer = pageFooter.cloneNode(true)
+            this.contentOutlineInner.appendChild(this.footer)
         }
 
         appendChild(element) {
-            this.contentOutlineInner.appendChild(element)
+            this.contentOutlineInner.insertBefore(element, this.footer)
         }
 
         createContainer() {
