@@ -45,6 +45,11 @@ html {
     height: 100%;
 }
 
+.br-page-margin-bottom {
+    position: relative;
+    bottom: 0;
+}
+
 .br-content-outline {
     border: 1px solid black;
 }
@@ -63,6 +68,10 @@ html {
 .br-page-header {}
 /* print to every page's bottom */
 .br-page-footer {}
+/* will insert page number into this */
+.br-page-number {}
+/* will insert total page number into this */
+.br-total-number {}
 /* elements in group are printed while the group is printing */
 .br-group {}
 /* disable .br-group */

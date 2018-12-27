@@ -2,8 +2,10 @@
     const WALKER_ASYNC_PROCESS_COUNT = 1
     const SHRINK_ASYNC_PROCESS_COUNT = 10
 
+    let pageMarginTop
     let pageHeader
     let pageFooter
+    let pageMarginBottom
 
     const main = async () => {
         await pagerize()
@@ -13,7 +15,7 @@
         const contentContainer = document.getElementsByClassName('br-content')[0]
 
         addMetadata(contentContainer)
-        cutPageHeaderAndFooter(contentContainer)
+        cutFixedContents(contentContainer)
 
         const pagesContainer = document.createElement('div')
         pagesContainer.classList.add('br-pages-container')
@@ -202,6 +204,16 @@
         const content = document.getElementsByClassName('br-content')[0]
         content.parentElement.removeChild(content)
 
+        let count = 0
+        const pages = document.querySelectorAll('.br-page')
+        for (const page of pages) {
+            ++count
+            const pageNumber = page.querySelector(':scope .br-page-number')
+            pageNumber && (pageNumber.textContent = count)
+            const totalNumber = page.querySelector(':scope .br-total-number')
+            totalNumber && (totalNumber.textContent = pages.length)
+        }
+
         await hideIndicator()
     }
 
@@ -225,7 +237,15 @@
         }
     }
 
-    const cutPageHeaderAndFooter = (contentContainer) => {
+    const cutFixedContents = (contentContainer) => {
+        pageMarginTop = contentContainer.querySelector(':scope .br-page-margin-top')
+        if (pageMarginTop) {
+            pageMarginTop.parentElement.removeChild(pageMarginTop)
+        } else {
+            pageMarginTop = document.createElement('div')
+            pageMarginTop.classList.add('br-page-margin-top')
+        }
+
         pageHeader = contentContainer.querySelector(':scope .br-page-header')
         if (pageHeader) {
             pageHeader.parentElement.removeChild(pageHeader)
@@ -240,6 +260,14 @@
         } else {
             pageFooter = document.createElement('div')
             pageFooter.classList.add('br-page-footer')
+        }
+
+        pageMarginBottom = contentContainer.querySelector(':scope .br-page-margin-bottom')
+        if (pageMarginBottom) {
+            pageMarginBottom.parentElement.removeChild(pageMarginBottom)
+        } else {
+            pageMarginBottom = document.createElement('div')
+            pageMarginBottom.classList.add('br-page-margin-bottom')
         }
     }
 
@@ -352,20 +380,28 @@
     }
 
     class Page {
-        constructor() {    
+        constructor() {
             this.container = this.createContainer()
             this.containerInner = this.createContainerInner()
             this.container.appendChild(this.containerInner)
 
+            this.contentOutlineOuter = this.createContentOutlineOuter()
+            this.containerInner.appendChild(this.contentOutlineOuter)
             this.contentOutline = this.createContentOutline()
-            this.containerInner.appendChild(this.contentOutline)
+            this.contentOutlineOuter.appendChild(this.contentOutline)
             this.contentOutlineInner = this.createContentOutlineInner()
             this.contentOutline.appendChild(this.contentOutlineInner)
+
+            this.marginTop = pageMarginTop.cloneNode(true)
+            this.contentOutlineOuter.insertBefore(this.marginTop, this.contentOutline)
 
             this.header = pageHeader.cloneNode(true)
             this.contentOutlineInner.appendChild(this.header)
             this.footer = pageFooter.cloneNode(true)
             this.contentOutlineInner.appendChild(this.footer)
+
+            this.marginBottom = pageMarginBottom.cloneNode(true)
+            this.contentOutlineOuter.appendChild(this.marginBottom)
         }
 
         appendChild(element) {
@@ -381,6 +417,12 @@
         createContainerInner() {
             const element = document.createElement('div')
             element.className = 'br-page-inner'
+            return element
+        }
+
+        createContentOutlineOuter() {
+            const element = document.createElement('div')
+            element.className = 'br-content-outline-outer'
             return element
         }
 
@@ -401,7 +443,7 @@
         }
 
         getContentHeight() {
-            return getLayout(this.contentOutlineInner).height
+            return getLayout(this.contentOutlineOuter).height
         }
     }
 
