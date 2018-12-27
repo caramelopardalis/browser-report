@@ -264,6 +264,9 @@ We can't control browser's page breaking when contents overflowed. So, this libr
                 padding-bottom: 10mm;
                 text-align: right;
             }
+            .page-numbers {
+                text-align: right;
+            }
 
             .br-grid-header {
                 padding: .5em;
@@ -294,6 +297,9 @@ We can't control browser's page breaking when contents overflowed. So, this libr
             <div class="br-indicator"></div>
         </div>
         <div class="br-content">
+            <div class="br-page-margin-top">
+                ：8]：8]：8]：8]：8]：8]
+            </div>
             <div class="br-page-header">
                 <h1>Gorilla Report</h1>
             </div>
@@ -312,7 +318,12 @@ We can't control browser's page breaking when contents overflowed. So, this libr
                 </div>
             </div>
             <div class="br-page-footer">
-                <q>https://en.wikipedia.org/wiki/Western_lowland_gorilla</q>
+                <q>https://en.wikipedia.org/wiki/Western_lowland_gorilla</q><br>
+            </div>
+            <div class="br-page-margin-bottom">
+                <div class="page-numbers">
+                    <span class="br-page-number"></span> / <span class="br-total-number"></span>
+                </div>
             </div>
         </div>
         <a class="github-fork-ribbon left-top" data-ribbon="Print Emulating" title="Print Emulating">Print Emulating</a> 
