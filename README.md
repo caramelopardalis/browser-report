@@ -1,8 +1,8 @@
 # browser-report
 
-Layout library for browser based reporting.
+Page breaking library for browser based reporting (HTML + CSS).
 
-We can't control browser's page breaking when contents overflowed. So, this library splits overflowed contents, and breaks the page on DOM tree.
+We can't control browser's page breaking when contents overflowed. So this library splits overflowed contents and breaks the page on DOM tree.
 
 [Demo page](https://caramelopardalis.github.io/browser-report).
 

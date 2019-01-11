@@ -59,6 +59,8 @@
                         // move the group to next page
                         for (const datumInNearestGroup of dataInNearestGroup) {
                             datumInNearestGroup.setAttribute('br-removed-count', 0)
+                            datumInNearestGroup.removeAttribute('br-shrink-begin')
+                            datumInNearestGroup.removeAttribute('br-shrink-end')
                             contentContainer.querySelector(':scope [data-br-id="' + datumInNearestGroup.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', 0)
                         }
                         dataInNearestGroup.parentElement.removeChild(dataInNearestGroup)
@@ -81,6 +83,8 @@
                             let newStartIndex = startIndex === 0 ? originalText.length - removedCount : startIndex + (originalText.length - startIndex - removedCount)
 
                             newDatumInNearestGroup.setAttribute('data-br-removed-count', 0)
+                            newDatumInNearestGroup.removeAttribute('data-br-shrink-begin')
+                            newDatumInNearestGroup.removeAttribute('data-br-shrink-end')
                             contentContainer.querySelector(':scope [data-br-id="' + newDatumInNearestGroup.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', 0)
 
                             if (removedCount === 0) {
@@ -126,13 +130,42 @@
                 }
             }
             if (mostHighestElement) {
-                const removedCount = parseInt(mostHighestElement.getAttribute('data-br-removed-count')) + 1
-                mostHighestElement.setAttribute('data-br-removed-count', removedCount)
-                contentContainer.querySelector(':scope [data-br-id="' + mostHighestElement.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', removedCount)
-                const startIndex = parseInt(mostHighestElement.getAttribute('data-br-start-index'))
-                const originalText = mostHighestElement.getAttribute('data-br-original-text')
-                const inner = mostHighestElement.querySelector(':scope > .br-grid-data-inner')
-                inner.textContent = originalText.substring(startIndex, originalText.length - removedCount)
+                while (true) {
+                    const originalText = mostHighestElement.getAttribute('data-br-original-text')
+                    const startIndex = parseInt(mostHighestElement.getAttribute('data-br-start-index'))
+                    const removedCount = parseInt(mostHighestElement.getAttribute('data-br-removed-count'))
+                    const remainedText = originalText.substring(startIndex, originalText.length - removedCount)
+                    const inner = mostHighestElement.querySelector(':scope > .br-grid-data-inner')
+
+                    let shrinkBegin = mostHighestElement.hasAttribute('data-br-shrink-begin') ? parseInt(mostHighestElement.getAttribute('data-br-shrink-begin')) : startIndex
+                    let shrinkEnd = mostHighestElement.hasAttribute('data-br-shrink-end') ? parseInt(mostHighestElement.getAttribute('data-br-shrink-end')) : originalText.length
+                    let shrinkedText = originalText.substring(startIndex, shrinkEnd)
+
+                    inner.textContent = shrinkedText
+                    if (page.getHeight() < page.getContentHeight()) {
+                        inner.textContent = shrinkedText.substring(0, shrinkedText.length - 1)
+                        if (page.getContentHeight() <= page.getHeight()) {
+                            mostHighestElement.setAttribute('data-br-removed-count', originalText.length - shrinkEnd + 1)
+                            contentContainer.querySelector(':scope [data-br-id="' + mostHighestElement.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', originalText.length - shrinkEnd + 1)
+                            mostHighestElement.removeAttribute('data-br-shrink-begin')
+                            mostHighestElement.removeAttribute('data-br-shrink-end')
+                            break
+                        }
+                    }
+
+                    const leftHalfText = originalText.substring(startIndex, shrinkBegin + Math.ceil((shrinkEnd - shrinkBegin) / 2))
+                    inner.textContent = leftHalfText
+                    if (page.getContentHeight() <= page.getHeight()) {
+                        // use right
+                        shrinkBegin = shrinkBegin + Math.ceil((shrinkEnd - shrinkBegin) / 2)
+                    } else {
+                        // use left
+                        shrinkEnd = shrinkBegin + Math.ceil((shrinkEnd - shrinkBegin) / 2)
+                    }
+
+                    mostHighestElement.setAttribute('data-br-shrink-begin', shrinkBegin)
+                    mostHighestElement.setAttribute('data-br-shrink-end', shrinkEnd)
+                }
             }
         }
 
