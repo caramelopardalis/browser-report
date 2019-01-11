@@ -47,6 +47,8 @@
             insertedNearestGroup.parentElement.removeChild(insertedNearestGroup)
 
             while (page.getHeight() < page.getContentHeight()) {
+                let dataInNearestGroup
+
                 while (page.getHeight() < page.getContentHeight()) {
                     if (++shrinkCount === SHRINK_ASYNC_PROCESS_COUNT) {
                         shrinkCount = 0
@@ -57,6 +59,7 @@
 
                     if (!hasData(currentElement)) {
                         // move the group to next page
+                        dataInNearestGroup = nearestGroup.querySelectorAll(':scope .br-grid-data')
                         for (const datumInNearestGroup of dataInNearestGroup) {
                             datumInNearestGroup.setAttribute('br-removed-count', 0)
                             datumInNearestGroup.removeAttribute('br-shrink-begin')
@@ -69,7 +72,7 @@
                 }
 
                 const nearestGroup = page.container.querySelector(':scope [data-br-id="' + originalNearestGroup.getAttribute('data-br-id') + '"]')
-                const dataInNearestGroup = nearestGroup.querySelectorAll(':scope .br-grid-data')
+                dataInNearestGroup = nearestGroup.querySelectorAll(':scope .br-grid-data')
                 for (const datumInNearestGroup of dataInNearestGroup) {
                     if (0 < parseInt(datumInNearestGroup.getAttribute('data-br-removed-count'))) {
                         copyGroupToNextPage(currentElement)
@@ -184,10 +187,37 @@
         }
 
         const moveToNextPage = (element) => {
-            element.parentElement.removeChild(element)
+            let ancestorGroup = element.closest('.br-group')
+
+            if (!ancestorGroup) {
+                page = new Page()
+                pagesContainer.appendChild(page.container)
+                page.appendChild(element)
+                return
+            }
+
+            const ancestorGroups = []
+            const ancestorGroupsIds = []
+            while (ancestorGroup) {
+                ancestorGroups.push(ancestorGroup)
+                ancestorGroupsIds.push(ancestorGroup.getAttribute('data-br-id'))
+                ancestorGroup = ancestorGroup.parentElement.closest('.br-group')
+            }
+
+            const clonedFarthestGroup = ancestorGroups[ancestorGroups.length - 1].cloneNode(true)
+            const closestGroup = element.closest('.br-group')
+            closestGroup.parentElement.removeChild(closestGroup)
+
+            const groupedGroups = clonedFarthestGroup.querySelectorAll(':scope .br-group')
+            for (const groupedGroup of groupedGroups) {
+                if (!ancestorGroupsIds.includes(groupedGroup.getAttribute('data-br-id'))) {
+                    groupedGroup.parentElement.removeChild(groupedGroup)
+                }
+            }
+
             page = new Page()
             pagesContainer.appendChild(page.container)
-            page.appendChild(element)
+            page.appendChild(clonedFarthestGroup)
         }
 
         const copyGroupToNextPage = (currentElement) => {
