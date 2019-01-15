@@ -59,6 +59,7 @@
 
                     if (!hasData(currentElement)) {
                         // move the group to next page
+                        const nearestGroup = page.container.querySelector(':scope [data-br-id="' + originalNearestGroup.getAttribute('data-br-id') + '"]')
                         dataInNearestGroup = nearestGroup.querySelectorAll(':scope .br-grid-data')
                         for (const datumInNearestGroup of dataInNearestGroup) {
                             datumInNearestGroup.setAttribute('br-removed-count', 0)
@@ -66,7 +67,7 @@
                             datumInNearestGroup.removeAttribute('br-shrink-end')
                             contentContainer.querySelector(':scope [data-br-id="' + datumInNearestGroup.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', 0)
                         }
-                        dataInNearestGroup.parentElement.removeChild(dataInNearestGroup)
+                        nearestGroup.parentElement.removeChild(nearestGroup)
                         copyGroupToNextPage(currentElement)
                     }
                 }
@@ -122,18 +123,19 @@
             const nearestGroup = page.container.querySelector(':scope [data-br-id="' + originalNearestGroup.getAttribute('data-br-id') + '"]')
             const dataInNearestGroup = nearestGroup.querySelectorAll(':scope .br-grid-data')
 
-            let mostHighestHeight = 0
-            let mostHighestElement
-            for (const datumInNearestGroup of dataInNearestGroup) {
-                const inner = datumInNearestGroup.querySelector(':scope > .br-grid-data-inner')
-                const height = getLayout(inner).height
-                if (mostHighestHeight < height) {
-                    mostHighestHeight = height
-                    mostHighestElement = datumInNearestGroup
+            while (true) {
+                let mostHighestHeight = 0
+                let mostHighestElement
+                for (const datumInNearestGroup of dataInNearestGroup) {
+                    const inner = datumInNearestGroup.querySelector(':scope > .br-grid-data-inner')
+                    const height = getLayout(inner).height
+                    if (mostHighestHeight < height) {
+                        mostHighestHeight = height
+                        mostHighestElement = datumInNearestGroup
+                    }
                 }
-            }
-            if (mostHighestElement) {
-                while (true) {
+
+                if (mostHighestElement) {
                     const originalText = mostHighestElement.getAttribute('data-br-original-text')
                     const startIndex = parseInt(mostHighestElement.getAttribute('data-br-start-index'))
                     const removedCount = parseInt(mostHighestElement.getAttribute('data-br-removed-count'))
@@ -156,18 +158,42 @@
                         }
                     }
 
-                    const leftHalfText = originalText.substring(startIndex, shrinkBegin + Math.ceil((shrinkEnd - shrinkBegin) / 2))
-                    inner.textContent = leftHalfText
-                    if (page.getContentHeight() <= page.getHeight()) {
-                        // use right
-                        shrinkBegin = shrinkBegin + Math.ceil((shrinkEnd - shrinkBegin) / 2)
+                    if (page.getContentHeight() <= page.getHeight() && remainedText.length === shrinkedText.length) {
+                        mostHighestElement.setAttribute('data-br-removed-count', 0)
+                        contentContainer.querySelector(':scope [data-br-id="' + mostHighestElement.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', 0)
+                        mostHighestElement.removeAttribute('data-br-shrink-begin')
+                        mostHighestElement.removeAttribute('data-br-shrink-end')
+                        break
+                    }
+
+                    if (shrinkedText.length === 1) {
+                        shrinkEnd = startIndex
                     } else {
-                        // use left
-                        shrinkEnd = shrinkBegin + Math.ceil((shrinkEnd - shrinkBegin) / 2)
+                        const leftHalfText = originalText.substring(startIndex, shrinkBegin + Math.ceil((shrinkEnd - shrinkBegin) / 2))
+                        inner.textContent = leftHalfText
+                        if (page.getContentHeight() <= page.getHeight()) {
+                            // use right
+                            shrinkBegin = shrinkBegin + Math.ceil((shrinkEnd - shrinkBegin) / 2)
+                        } else {
+                            // use left
+                            shrinkEnd = shrinkBegin + Math.ceil((shrinkEnd - shrinkBegin) / 2)
+                        }
                     }
 
                     mostHighestElement.setAttribute('data-br-shrink-begin', shrinkBegin)
                     mostHighestElement.setAttribute('data-br-shrink-end', shrinkEnd)
+                }
+
+                let hasData = false
+                for (const datumInNearestGroup of dataInNearestGroup) {
+                    const inner = datumInNearestGroup.querySelector(':scope > .br-grid-data-inner')
+                    if (0 < inner.textContent.length) {
+                        hasData = true
+                        break
+                    }
+                }
+                if (!hasData) {
+                    break
                 }
             }
         }
