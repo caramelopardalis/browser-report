@@ -582,7 +582,7 @@
         renderer: 'svg',
         loop: true,
         autoplay: true,
-        path: 'indicator.json'
+        path: '../indicator.json'
     })
 
     const waiter = new Waiter(main)
