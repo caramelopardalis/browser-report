@@ -331,7 +331,3 @@ We can't control browser's page breaking when contents overflowed. So this libra
     </body>
 </html>
 ```
-
-## Licenses
-
-* Thanks to loading.io (https://loading.io/spinner/ellipsis)

@@ -129,11 +129,16 @@
                 for (const datumInNearestGroup of dataInNearestGroup) {
                     const inner = datumInNearestGroup.querySelector(':scope > .br-grid-data-inner')
                     const height = getLayout(inner).height
-                    if (mostHighestHeight < height) {
+                    if (mostHighestHeight < height
+                        || (mostHighestHeight === height
+                            && mostHighestElement
+                            && mostHighestElement.textContent.length < datumInNearestGroup.textContent.length)) {
                         mostHighestHeight = height
                         mostHighestElement = datumInNearestGroup
                     }
                 }
+
+                console.log(mostHighestElement.textContent)
 
                 if (mostHighestElement) {
                     const originalText = mostHighestElement.getAttribute('data-br-original-text')
@@ -146,6 +151,9 @@
                     let shrinkEnd = mostHighestElement.hasAttribute('data-br-shrink-end') ? parseInt(mostHighestElement.getAttribute('data-br-shrink-end')) : originalText.length
                     let shrinkedText = originalText.substring(startIndex, shrinkEnd)
 
+                    // 1 文字減らしてぴったりならそのデータは👌としてマークする
+                    // グループないのすべてのデータが👌になったらシュリンク完了とみなす
+
                     inner.textContent = shrinkedText
                     if (page.getHeight() < page.getContentHeight()) {
                         inner.textContent = shrinkedText.substring(0, shrinkedText.length - 1)
@@ -154,16 +162,34 @@
                             contentContainer.querySelector(':scope [data-br-id="' + mostHighestElement.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', originalText.length - shrinkEnd + 1)
                             mostHighestElement.removeAttribute('data-br-shrink-begin')
                             mostHighestElement.removeAttribute('data-br-shrink-end')
+                            console.log('Success shrinking', inner.textContent)
                             break
                         }
                     }
 
-                    if (page.getContentHeight() <= page.getHeight() && remainedText.length === shrinkedText.length) {
-                        mostHighestElement.setAttribute('data-br-removed-count', 0)
-                        contentContainer.querySelector(':scope [data-br-id="' + mostHighestElement.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', 0)
-                        mostHighestElement.removeAttribute('data-br-shrink-begin')
-                        mostHighestElement.removeAttribute('data-br-shrink-end')
-                        break
+                    if (page.getContentHeight() <= page.getHeight()) {
+                        let noNeedShrink = true
+                        for (const datumInNearestGroup of dataInNearestGroup) {
+                            const datumOriginalText = datumInNearestGroup.getAttribute('data-br-original-text')
+                            const datumStartIndex = parseInt(datumInNearestGroup.getAttribute('data-br-start-index'))
+                            const datumRemovedCount = parseInt(datumInNearestGroup.getAttribute('data-br-removed-count'))
+                            const datumRemainedText = datumOriginalText.substring(datumStartIndex, datumOriginalText.length - datumRemovedCount)
+                            const datumShrinkBegin = datumInNearestGroup.hasAttribute('data-br-shrink-begin') ? parseInt(datumInNearestGroup.getAttribute('data-br-shrink-begin')) : datumStartIndex
+                            const datumShrinkEnd = datumInNearestGroup.hasAttribute('data-br-shrink-end') ? parseInt(datumInNearestGroup.getAttribute('data-br-shrink-end')) : datumOriginalText.length
+                            const datumShrinkedText = datumOriginalText.substring(datumStartIndex, datumShrinkEnd)
+                            console.log(datumRemainedText, datumShrinkedText)
+                            if (datumRemainedText.length !== datumShrinkedText.length) {
+                                noNeedShrink = false
+                                break
+                            }
+                        }
+                        if (noNeedShrink) {
+                            mostHighestElement.setAttribute('data-br-removed-count', 0)
+                            contentContainer.querySelector(':scope [data-br-id="' + mostHighestElement.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', 0)
+                            mostHighestElement.removeAttribute('data-br-shrink-begin')
+                            mostHighestElement.removeAttribute('data-br-shrink-end')
+                            break
+                        }
                     }
 
                     if (shrinkedText.length === 1) {
@@ -479,7 +505,7 @@
                 if (this.counter === 0) {
                     this.callback()
                 }
-            }, 0)
+            }, 5000)
         }
     }
 
@@ -550,6 +576,14 @@
             return getLayout(this.contentOutlineOuter).height
         }
     }
+
+    bodymovin.loadAnimation({
+        container: document.getElementsByClassName('br-indicator')[0],
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        path: 'indicator.json'
+    })
 
     const waiter = new Waiter(main)
 
