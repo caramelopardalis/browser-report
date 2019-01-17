@@ -580,16 +580,24 @@
     const scripts = document.getElementsByTagName('script')
     const selfSrc = scripts[scripts.length - 1].src;
     const selfDirectory = selfSrc.substr(0, selfSrc.lastIndexOf('/') + 1)
-    bodymovin.loadAnimation({
-        container: document.getElementsByClassName('br-indicator')[0],
-        renderer: 'svg',
-        loop: true,
-        autoplay: true,
-        path: selfDirectory + 'indicator.json'
-    })
 
     const waiter = new Waiter(main)
 
+    waiter.wait(() => {
+        loadScripts([
+            selfDirectory + 'lottie.min.js'
+        ], () => {
+            bodymovin.loadAnimation({
+                container: document.getElementsByClassName('br-indicator')[0],
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                path: selfDirectory + 'indicator.json'
+            })
+            waiter.ok()
+        })
+    })
+    
     waiter.wait(() => {
         loadScripts([
             'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js'
