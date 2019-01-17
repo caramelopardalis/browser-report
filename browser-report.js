@@ -577,12 +577,15 @@
         }
     }
 
+    const scripts = document.getElementsByTagName('script')
+    const selfSrc = scripts[scripts.length - 1].src;
+    const selfDirectory = selfSrc.substr(0, selfSrc.lastIndexOf('/') + 1)
     bodymovin.loadAnimation({
         container: document.getElementsByClassName('br-indicator')[0],
         renderer: 'svg',
         loop: true,
         autoplay: true,
-        path: '../../indicator.json'
+        path: selfDirectory + 'indicator.json'
     })
 
     const waiter = new Waiter(main)
