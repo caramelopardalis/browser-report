@@ -331,3 +331,7 @@ We can't control browser's page breaking when contents overflowed. So this libra
     </body>
 </html>
 ```
+
+## Thanks
+
+Inspired by [paper-css](https://github.com/cognitom/paper-css).
