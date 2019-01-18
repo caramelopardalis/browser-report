@@ -62,9 +62,10 @@
                         const nearestGroup = page.container.querySelector(':scope [data-br-id="' + originalNearestGroup.getAttribute('data-br-id') + '"]')
                         dataInNearestGroup = nearestGroup.querySelectorAll(':scope .br-grid-data')
                         for (const datumInNearestGroup of dataInNearestGroup) {
-                            datumInNearestGroup.setAttribute('br-removed-count', 0)
-                            datumInNearestGroup.removeAttribute('br-shrink-begin')
-                            datumInNearestGroup.removeAttribute('br-shrink-end')
+                            datumInNearestGroup.setAttribute('data-br-removed-count', 0)
+                            datumInNearestGroup.removeAttribute('data-br-shrink-begin')
+                            datumInNearestGroup.removeAttribute('data-br-shrink-end')
+                            datumInNearestGroup.removeAttribute('data-br-success-shrinking')
                             contentContainer.querySelector(':scope [data-br-id="' + datumInNearestGroup.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', 0)
                         }
                         nearestGroup.parentElement.removeChild(nearestGroup)
@@ -89,6 +90,7 @@
                             newDatumInNearestGroup.setAttribute('data-br-removed-count', 0)
                             newDatumInNearestGroup.removeAttribute('data-br-shrink-begin')
                             newDatumInNearestGroup.removeAttribute('data-br-shrink-end')
+                            newDatumInNearestGroup.removeAttribute('data-br-success-shrinking')
                             contentContainer.querySelector(':scope [data-br-id="' + newDatumInNearestGroup.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', 0)
 
                             if (removedCount === 0) {
@@ -102,7 +104,7 @@
                             const inner = newDatumInNearestGroup.querySelector(':scope > .br-grid-data-inner')
                             inner.textContent = originalText.substring(newStartIndex)
                         }
-                        
+
                         break
                     }
                 }
@@ -129,16 +131,18 @@
                 for (const datumInNearestGroup of dataInNearestGroup) {
                     const inner = datumInNearestGroup.querySelector(':scope > .br-grid-data-inner')
                     const height = getLayout(inner).height
-                    if (mostHighestHeight < height
-                        || (mostHighestHeight === height
-                            && mostHighestElement
-                            && mostHighestElement.textContent.length < datumInNearestGroup.textContent.length)) {
+                    if (!datumInNearestGroup.hasAttribute('data-br-success-shrinking')
+                        && (
+                            mostHighestHeight < height
+                            || (mostHighestHeight === height
+                                && mostHighestElement
+                                && mostHighestElement.textContent.length < datumInNearestGroup.textContent.length
+                            )
+                        )) {
                         mostHighestHeight = height
                         mostHighestElement = datumInNearestGroup
                     }
                 }
-
-                console.log(mostHighestElement.textContent)
 
                 if (mostHighestElement) {
                     const originalText = mostHighestElement.getAttribute('data-br-original-text')
@@ -151,8 +155,8 @@
                     let shrinkEnd = mostHighestElement.hasAttribute('data-br-shrink-end') ? parseInt(mostHighestElement.getAttribute('data-br-shrink-end')) : originalText.length
                     let shrinkedText = originalText.substring(startIndex, shrinkEnd)
 
-                    // 1 文字減らしてぴったりならそのデータは👌としてマークする
-                    // グループないのすべてのデータが👌になったらシュリンク完了とみなす
+                    // Mark the element as 👌 if remove a one character in it and it has become not overflow
+                    // Success the shrinking when all data was marked as 👌 in the group
 
                     inner.textContent = shrinkedText
                     if (page.getHeight() < page.getContentHeight()) {
@@ -162,13 +166,11 @@
                             contentContainer.querySelector(':scope [data-br-id="' + mostHighestElement.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', originalText.length - shrinkEnd + 1)
                             mostHighestElement.removeAttribute('data-br-shrink-begin')
                             mostHighestElement.removeAttribute('data-br-shrink-end')
-                            console.log('Success shrinking', inner.textContent)
-                            break
+                            mostHighestElement.setAttribute('data-br-success-shrinking', true)
                         }
                     }
 
                     if (page.getContentHeight() <= page.getHeight()) {
-                        let noNeedShrink = true
                         for (const datumInNearestGroup of dataInNearestGroup) {
                             const datumOriginalText = datumInNearestGroup.getAttribute('data-br-original-text')
                             const datumStartIndex = parseInt(datumInNearestGroup.getAttribute('data-br-start-index'))
@@ -177,37 +179,40 @@
                             const datumShrinkBegin = datumInNearestGroup.hasAttribute('data-br-shrink-begin') ? parseInt(datumInNearestGroup.getAttribute('data-br-shrink-begin')) : datumStartIndex
                             const datumShrinkEnd = datumInNearestGroup.hasAttribute('data-br-shrink-end') ? parseInt(datumInNearestGroup.getAttribute('data-br-shrink-end')) : datumOriginalText.length
                             const datumShrinkedText = datumOriginalText.substring(datumStartIndex, datumShrinkEnd)
-                            console.log(datumRemainedText, datumShrinkedText)
-                            if (datumRemainedText.length !== datumShrinkedText.length) {
-                                noNeedShrink = false
-                                break
+                            if (datumOriginalText.substring(datumStartIndex).length === datumInNearestGroup.textContent.length) {
+                                datumInNearestGroup.setAttribute('data-br-removed-count', 0)
+                                contentContainer.querySelector(':scope [data-br-id="' + datumInNearestGroup.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', 0)
+                                datumInNearestGroup.removeAttribute('data-br-shrink-begin')
+                                datumInNearestGroup.removeAttribute('data-br-shrink-end')
+                                datumInNearestGroup.setAttribute('data-br-success-shrinking', true)
                             }
                         }
-                        if (noNeedShrink) {
-                            mostHighestElement.setAttribute('data-br-removed-count', 0)
-                            contentContainer.querySelector(':scope [data-br-id="' + mostHighestElement.getAttribute('data-br-id') + '"]').setAttribute('data-br-removed-count', 0)
-                            mostHighestElement.removeAttribute('data-br-shrink-begin')
-                            mostHighestElement.removeAttribute('data-br-shrink-end')
-                            break
-                        }
                     }
 
-                    if (shrinkedText.length === 1) {
-                        shrinkEnd = startIndex
-                    } else {
-                        const leftHalfText = originalText.substring(startIndex, shrinkBegin + Math.ceil((shrinkEnd - shrinkBegin) / 2))
-                        inner.textContent = leftHalfText
-                        if (page.getContentHeight() <= page.getHeight()) {
-                            // use right
-                            shrinkBegin = shrinkBegin + Math.ceil((shrinkEnd - shrinkBegin) / 2)
+                    if (!mostHighestElement.hasAttribute('data-br-success-shrinking')) {
+                        if (shrinkedText.length === 1) {
+                            shrinkEnd = startIndex
                         } else {
-                            // use left
-                            shrinkEnd = shrinkBegin + Math.ceil((shrinkEnd - shrinkBegin) / 2)
+                            const leftHalfText = originalText.substring(startIndex, shrinkBegin + Math.ceil((shrinkEnd - shrinkBegin) / 2))
+                            inner.textContent = leftHalfText
+                            if (page.getContentHeight() <= page.getHeight()) {
+                                // use right
+                                shrinkBegin = shrinkBegin + Math.ceil((shrinkEnd - shrinkBegin) / 2)
+                            } else {
+                                // use left
+                                shrinkEnd = shrinkBegin + Math.ceil((shrinkEnd - shrinkBegin) / 2)
+                            }
                         }
+    
+                        if (parseInt(mostHighestElement.getAttribute('data-br-shrink-begin')) === shrinkBegin
+                            && parseInt(mostHighestElement.getAttribute('data-br-shrink-end')) === shrinkEnd) {
+                            shrinkBegin = startIndex
+                            shrinkEnd = originalText.length
+                        }
+    
+                        mostHighestElement.setAttribute('data-br-shrink-begin', shrinkBegin)
+                        mostHighestElement.setAttribute('data-br-shrink-end', shrinkEnd)
                     }
-
-                    mostHighestElement.setAttribute('data-br-shrink-begin', shrinkBegin)
-                    mostHighestElement.setAttribute('data-br-shrink-end', shrinkEnd)
                 }
 
                 let hasData = false
@@ -219,6 +224,17 @@
                     }
                 }
                 if (!hasData) {
+                    break
+                }
+
+                let allShrinked = true
+                for (const datumInNearestGroup of dataInNearestGroup) {
+                    if (!datumInNearestGroup.hasAttribute('data-br-success-shrinking')) {
+                        allShrinked = false
+                        break
+                    }
+                }
+                if (allShrinked) {
                     break
                 }
             }
@@ -505,7 +521,7 @@
                 if (this.counter === 0) {
                     this.callback()
                 }
-            }, 5000)
+            }, 2000)
         }
     }
 
