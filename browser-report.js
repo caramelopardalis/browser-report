@@ -28,6 +28,12 @@
         let shrinkCount = 0
 
         const pageBreakIfOverflowed = async (clonedCurrentElement, currentElement) => {
+            if (clonedCurrentElement.classList.contains('br-page-break')) {
+                page = new Page()
+                pagesContainer.appendChild(page.container)
+                return
+            }
+
             if (page.getContentHeight() <= page.getHeight()) {
                 return
             }
