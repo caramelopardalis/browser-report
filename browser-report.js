@@ -1,6 +1,6 @@
 ((global) => {
-    const WALKER_ASYNC_PROCESS_COUNT = 1
-    const SHRINK_ASYNC_PROCESS_COUNT = 10
+    const WALKER_ASYNC_PROCESS_COUNT = 100
+    const SHRINK_ASYNC_PROCESS_COUNT = 100
 
     let pageMarginTop
     let pageHeader
