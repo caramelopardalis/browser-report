@@ -44,7 +44,7 @@ html {
     }
 }
 
-.br-page {
+.br-page:not(:last-child) {
     break-after: page;
 }
 
