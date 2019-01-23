@@ -8,6 +8,7 @@
 @page {
     size: A4;
     /* margin is overwrited by custom settings, and can't remove custom settings */
+    margin: 0.4in;
 }
 .br-a4-portrait .br-page {
     width: calc(var(--a4-x) - (var(--print-default-margin) * 2));
@@ -33,6 +34,13 @@ html {
         padding: var(--print-default-margin);
         background: white;
         box-shadow: 0 .5mm 2mm rgba(0, 0, 0, .3);
+    }
+}
+
+@media print {
+    html
+    ,body {
+        width: calc(var(--a4-x) - (var(--print-default-margin) * 2));
     }
 }
 
@@ -113,10 +121,8 @@ html {
 
 .br-indicator-container {
     position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+    width: 100vw;
+    height: 100vh;
     background-color: #fff;
     z-index: 99999;
 }
