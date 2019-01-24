@@ -1,4 +1,8 @@
 ((global) => {
+    global.BrowserReport = global.BrowserReport || {
+        auto: true
+    }
+
     const WALKER_ASYNC_PROCESS_COUNT = 100
     const SHRINK_ASYNC_PROCESS_COUNT = 100
 
@@ -648,4 +652,12 @@
             }, 0)
         }
     })
+
+    if (!BrowserReport.auto) {
+        waiter.wait(() => {
+            BrowserReport.run = () => {
+                waiter.ok()
+            }
+        })
+    }
 })(this)
