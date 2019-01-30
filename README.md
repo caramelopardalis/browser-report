@@ -332,6 +332,223 @@ We can't control browser's page breaking when contents overflowed. So this libra
 </html>
 ```
 
+### Example 4
+
+[Demo](example4/example4.html)
+
+#### Screenshot
+
+![Example4 on browser](example4/example4-on-browser.png)
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="../browser-report.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.2/gh-fork-ribbon.min.css">
+        <style>
+            h1 {
+                padding-top: 10mm;
+                padding-bottom: 10mm;
+                text-align: center;
+            }
+            .page-numbers {
+                text-align: right;
+            }
+
+            header {
+                padding: 1rem;
+            }
+            h2 {
+                font-size: 1rem;
+            }
+            .header-meta {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .br-grid-header.field-quantity
+            ,.br-grid-header.field-name
+            ,.br-grid-header.field-price {
+                font-weight: bold;
+                text-align: center;
+            }
+            .br-grid-data.field-quantity
+            ,.br-grid-data.field-name
+            ,.br-grid-data.field-price {
+                border-bottom: none !important;
+                padding: 1rem;
+                white-space: pre-wrap;
+            }
+            .br-grid-data.field-quantity {
+                text-align: center;
+            }
+            .br-grid-data.field-price {
+                text-align: right;
+            }
+
+            :root {
+                --field-quantity-width: 20mm;
+                --field-price-width: 30mm;
+            }
+            .br-grid-header.field-quantity {
+                min-width: var(--field-quantity-width);
+                max-width: var(--field-quantity-width);
+            }
+            .br-grid-data.field-quantity {
+                min-width: calc(var(--field-quantity-width) - (1rem * 2));
+                max-width: calc(var(--field-quantity-width) - (1rem * 2));
+            }
+            .field-name {
+                min-width: calc(var(--a4-x) - (var(--print-default-margin) * 2) - var(--field-quantity-width) - var(--field-price-width) - 4px);
+                max-width: calc(var(--a4-x) - (var(--print-default-margin) * 2) - var(--field-quantity-width) - var(--field-price-width) - 4px);
+            }
+            .br-grid-data.field-name {
+                min-width: calc(var(--a4-x) - (var(--print-default-margin) * 2) - var(--field-quantity-width) - var(--field-price-width) - (1rem * 2) - 4px);
+                max-width: calc(var(--a4-x) - (var(--print-default-margin) * 2) - var(--field-quantity-width) - var(--field-price-width) - (1rem * 2) - 4px);
+            }
+            .br-grid-header.field-price {
+                min-width: var(--field-price-width);
+                max-width: var(--field-price-width);
+            }
+            .br-grid-data.field-price {
+                min-width: calc(var(--field-price-width) - (1rem * 2));
+                max-width: calc(var(--field-price-width) - (1rem * 2));
+            }
+
+            footer {
+                display: flex;
+                flex-flow: column nowrap;
+                border-top: 1px solid #000;
+                padding: 1rem;
+            }
+            .subtotal
+            ,.delivery-charges
+            ,.total {
+                text-align: right;
+            }
+
+            .github-fork-ribbon:before {
+                background-color: #cce5df;
+            }
+            @media print {
+                .github-fork-ribbon {
+                    display: none;
+                }
+            }
+        </style>
+    </head>
+    <body class="br-a4-portrait">
+        <div class="br-indicator-container">
+            <div class="br-indicator"></div>
+        </div>
+        <div class="br-content">
+            <div class="br-page-margin-top">
+                <div class="page-numbers">
+                    Page <span class="br-page-number"></span> of <span class="br-total-number"></span>
+                </div>
+            </div>
+            <div class="br-page-header">
+                <h1>Gorilla Online Shop</h1>
+            </div>
+            <header>
+                <h2>納品書</h2>
+                <div class="header-meta">
+                    <div class="field-order-date">ご注文日 2019-01-01</div>
+                    <div class="field-order-number">ご注文番号 205-0345-23985-09</div>
+                    <div class="field-receipt-number">納品書番号 Ji9Bn20Dkjso84</div>
+                </div>
+            </header>
+            <div class="br-group group-orders">
+                <div class="br-grid br-bordered">
+                    <div class="br-grid-header field-quantity">数量</div>
+                    <div class="br-grid-header field-name">商品名</div>
+                    <div class="br-grid-header field-price">価格</div>
+                </div>
+            </div>
+            <footer>
+                <div class="subtotal">小計 ￥${subtotal}</div>
+                <div class="delivery-charges">配送料 ￥1,000</div>
+                <div class="total">合計 ￥${total}</div>
+            </footer>
+            <div class="br-page-margin-bottom">
+                Gorilla Inc.
+            </div>
+        </div>
+        <a class="github-fork-ribbon left-top" data-ribbon="Print Emulating" title="Print Emulating">Print Emulating</a>
+        <script>
+            ;((global) => {
+                const random = (min, max) => {
+                    return Math.floor(Math.random() * (max - min + 1) + min)
+                }
+
+                const orders = document.getElementsByClassName('group-orders')[0]
+                const numberOfOrders = random(0, 20)
+
+                let subtotalValue = 0
+
+                for (let i = 0; i < numberOfOrders; i++) {
+                    const product = document.createElement('div')
+                    product.classList.add('br-group')
+                    product.classList.add('br-grid')
+                    product.classList.add('br-bordered')
+                    orders.appendChild(product)
+
+                    const quantity = document.createElement('div')
+                    quantity.classList.add('br-grid-data')
+                    quantity.classList.add('field-quantity')
+                    quantity.textContent = random(1, 20)
+                    product.appendChild(quantity)
+
+                    const name = document.createElement('div')
+                    name.classList.add('br-grid-data')
+                    name.classList.add('field-name')
+                    name.textContent = [
+                        '入門 監視 Mike Julian　著、松浦 隼人　訳 228ページ 定価3,024円（税込） ISBN978-4-87311-864-2',
+                        'インテリジェンス駆動型インシデントレスポンス Scott J. Roberts、Rebekah Brown　著、石川 朝久　訳 280ページ 定価3,672円（税込） ISBN978-4-87311-866-6',
+                        'Python機械学習クックブック Chris Albon　著、中田 秀基　訳 368ページ 定価3,672円（税込） ISBN978-4-87311-867-3',
+                        '初めてのProcessing 第2版 Daniel Shiffman　著、尼岡 利崇　訳 592ページ 定価3,996円（税込） ISBN978-4-87311-861-1',
+                        'デザイニング・ボイスユーザーインターフェース Cathy Pearl　著、川本 大功　監訳、高橋 信夫　訳 304ページ 定価3,456円（税込） ISBN978-4-87311-858-1',
+                        '家庭の低温調理 Lisa Q. Fetterman、Meesha Halm、Scott Peabody　著、水原 文　訳 292ページ 定価3,456円（税込） ISBN978-4-87311-862-8',
+                        'バイオビルダー Natalie Kuldell、Rachel Bernstein、Karen Ingram、Kathryn M. Hart　著、津田 和俊　監訳、片野 晃輔、西原 由実、濱田 格雄　訳 260ページ 定価2,592円（税込） ISBN978-4-87311-833-8',
+                        'エレガントなSciPy Juan Nunez-Iglesias、Stéfan van der Walt、Harriet Dashnow　著、山崎 邦子、山崎 康宏　訳 272ページ 定価3,672円（税込） ISBN978-4-87311-860-4',
+                        'Go言語による並行処理 Katherine Cox-Buday　著、山口 能迪　訳 256ページ 定価3,024円（税込） ISBN978-4-87311-846-8',
+                        'Pythonによるデータ分析入門 第2版 ――NumPy、pandasを使ったデータ処理 Wes McKinney　著、瀬戸山 雅人、小林 儀匡、滝口 開資　訳 2018年07月 発行 596ページ ISBN978-4-87311-845-1',
+                        '実践 パケット解析 第3版 ――Wiresharkを使ったトラブルシューティング Chris Sanders　著、髙橋 基信、宮本 久仁男　監訳、岡 真由美　訳 2018年06月 発行 424ページ ISBN978-4-87311-844-4',
+                        'コンピュータサイエンス探偵の事件簿 ――データ構造と探索アルゴリズムが導く真実 Jeremy Kubica　著、鈴木 幸敏　訳 2018年06月 発行 268ページ ISBN978-4-87311-843-7',
+                        '生き物としての力を取り戻す50の自然体験 ――身近な野あそびから森で生きる方法まで カシオ計算機株式会社　監修、株式会社Surface&Architecture　編 2018年07月 発行 236ページ ISBN978-4-87311-842-0',
+                        'Pythonデータサイエンスハンドブック ――Jupyter、NumPy、pandas、Matplotlib、scikit-learnを使ったデータ分析、機械学習 Jake VanderPlas　著、菊池 彰　訳 2018年05月 発行 556ページ ISBN978-4-87311-841-3',
+                        '入門 Kubernetes Kelsey Hightower、Brendan Burns、Joe Beda　著、松浦 隼人　訳 2018年03月 発行 248ページ ISBN978-4-87311-840-6',
+                        '退屈をぶっとばせ！ ――自分の世界を広げるために本気で遊ぶ Joshua Glenn、Elizabeth Foy Larsen　著、大網 拓真、渡辺 圭介　訳 2018年05月 発行 348ページ ISBN978-4-87311-839-0',
+                        '実践 CSIRTプレイブック ――セキュリティ監視とインシデント対応の基本計画 Jeff Bollinger、Brandon Enright、Matthew Valites　著、飯島 卓也、小川 梢、柴田 亮、山田 正浩　監訳、谷崎 朋子　訳 2018年05月 発行 272ページ ISBN978-4-87311-838-3',
+                        '詳解 OpenCV 3 ――コンピュータビジョンライブラリを使った画像処理・認識 Adrian Kaehler, Gary Bradski　著、松田 晃一、小沼 千絵、永田 雅人、花形 理　訳 2018年05月 発行 992ページ ISBN978-4-87311-837-6',
+                        'ゼロから作るDeep Learning ❷ ――自然言語処理編 斎藤 康毅　著 2018年07月 発行 432ページ ISBN978-4-87311-836-9',
+                        'Effective DevOps ――4本柱による持続可能な組織文化の育て方 Jennifer Davis、Ryn Daniels　著、吉羽 龍太郎　監訳、長尾 高弘　訳 2018年03月 発行 376ページ ISBN978-4-87311-835-2',
+                    ][random(0, 19)]
+                    product.appendChild(name)
+
+                    const price = document.createElement('div')
+                    price.classList.add('br-grid-data')
+                    price.classList.add('field-price')
+                    const priceValue = random(100, 200000)
+                    subtotalValue += priceValue
+                    price.textContent = '￥' + priceValue.toLocaleString()
+                    product.appendChild(price)
+                }
+
+                const subtotal = document.getElementsByClassName('subtotal')[0]
+                subtotal.textContent = subtotal.textContent.replace('${subtotal}', subtotalValue.toLocaleString())
+
+                const total = document.getElementsByClassName('total')[0]
+                total.textContent = total.textContent.replace('${total}', (subtotalValue + 1000).toLocaleString())
+            })(this)
+        </script>
+        <script src="../browser-report.js"></script>
+    </body>
+</html>
+```
+
 ## Thanks
 
 Inspired by [paper-css](https://github.com/cognitom/paper-css).
