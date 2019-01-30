@@ -58,12 +58,7 @@
                 max-width: calc(var(--field-quantity-width) - (1rem * 2));
             }
             .field-name {
-                min-width: calc(var(--a4-x) - (var(--print-default-margin) * 2) - var(--field-quantity-width) - var(--field-price-width) - 4px);
-                max-width: calc(var(--a4-x) - (var(--print-default-margin) * 2) - var(--field-quantity-width) - var(--field-price-width) - 4px);
-            }
-            .br-grid-data.field-name {
-                min-width: calc(var(--a4-x) - (var(--print-default-margin) * 2) - var(--field-quantity-width) - var(--field-price-width) - (1rem * 2) - 4px);
-                max-width: calc(var(--a4-x) - (var(--print-default-margin) * 2) - var(--field-quantity-width) - var(--field-price-width) - (1rem * 2) - 4px);
+                flex-grow: 1;
             }
             .br-grid-header.field-price {
                 min-width: var(--field-price-width);
@@ -141,7 +136,7 @@
                 }
 
                 const orders = document.getElementsByClassName('group-orders')[0]
-                const numberOfOrders = random(0, 20)
+                const numberOfOrders = random(1000, 1000)
 
                 let subtotalValue = 0
 

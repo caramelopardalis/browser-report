@@ -1,6 +1,7 @@
 :root {
     --a4-x: 210mm;
-    --a4-y: 297mm;
+    /* print rendering result is overflowed the page in firefox. so subtract 2px */
+    --a4-y: calc(297mm - 2px);
     /* chromium's default value */
     --print-default-margin: 0.4in;
 }
