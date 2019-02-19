@@ -1,6 +1,6 @@
 # browser-report
 
-Page breaking library for browser based reporting (HTML + CSS).
+Browser based reporting engine aka HTML 帳票 (HTML + CSS + JavaScript).
 
 We can't control browser's page breaking when contents overflowed. So this library splits overflowed contents and breaks the page on DOM tree.
 
